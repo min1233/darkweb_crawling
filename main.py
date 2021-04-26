@@ -1,11 +1,13 @@
 import requests
 
-url = "http://myipaddress.com"
-proxies = {
-        "http":"socks5://127.0.0.1:9050",
-        "https":"socks5://127.0.0.1:9050",
+url = "http://gvka2m4qt5fod2fltkjmdk4gxh5oxemhpgmnmtjptms6fkgfzdd62tad.onion"
+session = requests.session()
+
+session.proxies = {
+        "http":"socks5h://127.0.0.1:9050",
+        "https":"socks5h://127.0.0.1:9050",
 }
 
-rep = requests.get(url, proxies = proxies)
+rep = session.get(url)
 
 print(rep.text)
