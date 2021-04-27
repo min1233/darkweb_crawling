@@ -1,7 +1,9 @@
 import mysqllib as mysql_class
 import requests
 import re
+from datetime import datetime
 from bs4 import BeautifulSoup
+import os
 
 search_url = "https://onionsearchengine.com/search.php?search=TEST&submit=Search&page="
 
@@ -35,22 +37,23 @@ def search_keyword(keyword, i=100):
             get_http_link(a_tag)
 
 if __name__ == "__main__":
-    search_keyword("gun", 3)
+    dir_path = "./data/"+datetime.today().strftime("%Y_%m_%d")
+    os.system(f"mkdir {dir_path}")
+    search_keyword("gun", 100)
     for i, url in enumerate(http_list):
         try:
             rep = session.get(url)
             bs = BeautifulSoup(rep.text, 'html.parser')
             
             title = bs.select_one('title').text
-            file_path = "./data/"+str(i)+".html"
+            file_path = dir_path+"/"+str(i)+".html"
             
             mysql = mysql_class.mysql()
             mysql.insert_data(url, title, file_path)
 
             f = open(file_path,"w")
             f.write(rep.text)
-            f.close()
-            
+            f.close()            
         except Exception as e:
             print(e)
             continue
