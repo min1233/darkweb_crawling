@@ -30,8 +30,7 @@ def get_http_link(a_tag, http_list):
     return list(set(http_list))
 
 # search for keyword at onionsearchengine.com
-def search_keyword(keyword, index=100):
-    http_list = []
+def search_keyword(keyword, index=100, http_list=[]):
     for i in range(1, index):
         rep = requests.get(search_url.replace("TEST",keyword)+str(i))
         if(rep.text.find("Sorry, there are no matching result fo")!=-1):
@@ -45,7 +44,7 @@ def search_keyword(keyword, index=100):
     return http_list
 
 # access onion url in http list
-def find_onion(keyword, http_list):
+def find_onion(keyword, http_list, mysql):
     count = 0;
     dir_path = "./data/"+datetime.today().strftime("%Y_%m_%d")+"/"+keyword
     os.system(f"mkdir -p {dir_path}")
@@ -58,7 +57,6 @@ def find_onion(keyword, http_list):
             file_path = dir_path+"/"+str(count)+".html"
             print(f"{bold}[{keyword}]{end} Find Title : {title}")
             
-            mysql = mysql_class.mysql()
             mysql.insert_data(url, title, file_path)
 
             f = open(file_path,"w")
@@ -81,11 +79,16 @@ def find_onion(keyword, http_list):
     mysql.close()
 
 # main thread function
-def main_fun(keyword, index):
-    http_list = search_keyword(keyword, index)
-    find_onion(keyword, http_list)
+def main_fun(keyword, index, mysql, http_list):
+    http_list = search_keyword(keyword, index, http_list)
+    find_onion(keyword, http_list, mysql)
 
 if __name__ == "__main__":
-    main_fun("gun", 100);
+    mysql = mysql_class.mysql()
+    tmp_list = mysql.select_data()
+    http_list = []
+    for tmp in tmp_list:
+        http_list.append(tmp[0])
+    main_fun("gun", 200, mysql, http_list);
 #    t = threading.Thread(tarrget=keyword_search, args=["gun",100])
 #    t.start()
