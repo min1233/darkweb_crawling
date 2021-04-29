@@ -11,7 +11,7 @@ class mysql:
         self.conn.commit()
 
     def select_data(self):
-        sql = "select * from onion_url"
+        sql = "select url from onion_url"
         self.cursor.execute(sql)
         rows = self.cursor.fetchall()
         return rows
