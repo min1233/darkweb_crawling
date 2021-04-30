@@ -10,10 +10,10 @@ class mysql:
         self.cursor.execute(sql, (url,title,file_path))
         self.conn.commit()
 
-    def select_data(self):
-        sql = "select url from onion_url"
-        self.cursor.execute(sql)
-        rows = self.cursor.fetchall()
+    def select_data(self, url):
+        sql = "select url from onion_url WHERE url=%s"
+        self.cursor.execute(sql, (url))
+        rows = self.cursor.fetchone()
         return rows
 
     def close(self):
