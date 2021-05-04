@@ -3,6 +3,7 @@ import requests
 import re
 import os
 import threading
+import time
 from datetime import datetime
 from bs4 import BeautifulSoup
 
@@ -31,28 +32,33 @@ def get_http_link(a_tag, http_list):
 
 # search for keyword at onionsearchengine.com
 def search_keyword(keyword, mysql, index=100):
-    http_list = []
+    tmp_list = []
     for i in range(1, index):
-        if(i%100==0):
-            print(f"{i} / {index}")
-        rep = requests.get(search_url.replace("TEST",keyword)+str(i))
-        if(rep.text.find("Sorry, there are no matching result fo")!=-1):
-            print("Search END")
-            break
-        else:
-            bs = BeautifulSoup(rep.text, 'html.parser')
-            a_tag = bs.select('a')
-            http_list = get_http_link(a_tag, http_list)
-    for http in http_list:
-        if(detect_stored_url(http, mysql)==1):
-            http_list.remove(http)
+        try:
+            if(i%100==0):
+                print(f"{i} / {index}")
+            rep = requests.get(search_url.replace("TEST",keyword)+str(i))
+            if(rep.text.find("Sorry, there are no matching result fo")!=-1):
+                print("Search END")
+                break
+            else:
+                bs = BeautifulSoup(rep.text, 'html.parser')
+                a_tag = bs.select('a')
+                tmp_list = get_http_link(a_tag, tmp_list)
+        except:
+            print(f"{i} / {index} Error")
+            time.sleep(10)
+    http_list = []
+    for http in tmp_list:
+        if(detect_stored_url(http, mysql)==0):
+            http_list.append(http)
     print(f"Keyword : {keyword}, Found {len(http_list)} onion")
     return http_list
 
 # access onion url in http list
 def find_onion(keyword, http_list, mysql):
     count = 1;
-    dir_path = "./data/"+datetime.today().strftime("%Y_%m_%d")+"/"+keyword
+    dir_path = "./data/"+datetime.today().strftime("%Y_%m_%d")+"/"+keyword.replace(" ","_")
     os.system(f"mkdir -p {dir_path}")
     for url in http_list:
         try:
@@ -101,11 +107,11 @@ def main_fun(keyword, index, mysql):
     find_onion(keyword, http_list, mysql)
 
 if __name__ == "__main__":
-    keyword_list = ["sex", "account","credit card"]
+    keyword_list = ["credit card","police","porn"]
     mysql = mysql_class.mysql()
     # search keyword
     for keyword in keyword_list:
-        main_fun(keyword, 1000, mysql);
+        main_fun(keyword, 200, mysql);
     mysql.close()
 #    t = threading.Thread(tarrget=keyword_search, args=["gun",100])
 #    t.start()
